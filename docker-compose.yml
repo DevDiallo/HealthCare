@@ -1,0 +1,135 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: healthcare-postgres
+    environment:
+      POSTGRES_USER: healthcare
+      POSTGRES_PASSWORD: healthcare
+      POSTGRES_DB: healthcare_auth
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d
+    networks:
+      - healthcare_net
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U healthcare']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  auth-service:
+    build: ./backend/auth-service
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/healthcare_auth
+      DB_USERNAME: healthcare
+      DB_PASSWORD: healthcare
+      JWT_SECRET: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZg==
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - healthcare_net
+
+  hospital-service:
+    build: ./backend/hospital-service
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/healthcare_hospital
+      DB_USERNAME: healthcare
+      DB_PASSWORD: healthcare
+      JWT_SECRET: 0123456789ABCDEF0123456789ABCDEF
+      SERVER_PORT: 8082
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - healthcare_net
+
+  patient-service:
+    build: ./backend/patient-service
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/healthcare_patient
+      DB_USERNAME: healthcare
+      DB_PASSWORD: healthcare
+      JWT_SECRET: 0123456789ABCDEF0123456789ABCDEF
+      SERVER_PORT: 8083
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - healthcare_net
+
+  doctor-service:
+    build: ./backend/doctor-service
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/healthcare_doctor
+      DB_USERNAME: healthcare
+      DB_PASSWORD: healthcare
+      JWT_SECRET: 0123456789ABCDEF0123456789ABCDEF
+      SERVER_PORT: 8084
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - healthcare_net
+
+  appointment-service:
+    build: ./backend/appointment-service
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/healthcare_appointment
+      DB_USERNAME: healthcare
+      DB_PASSWORD: healthcare
+      JWT_SECRET: 0123456789ABCDEF0123456789ABCDEF
+      SERVER_PORT: 8085
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - healthcare_net
+
+  notification-service:
+    build: ./backend/notification-service
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/healthcare_notification
+      DB_USERNAME: healthcare
+      DB_PASSWORD: healthcare
+      JWT_SECRET: 0123456789ABCDEF0123456789ABCDEF
+      SERVER_PORT: 8086
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - healthcare_net
+
+  frontend:
+    build: ./frontend
+    networks:
+      - healthcare_net
+
+  gateway:
+    build: ./gateway
+    depends_on:
+      - frontend
+      - auth-service
+      - hospital-service
+      - patient-service
+      - doctor-service
+      - appointment-service
+      - notification-service
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./nginx/certs:/etc/nginx/certs:ro
+    networks:
+      - healthcare_net
+
+networks:
+  healthcare_net:
+    driver: bridge
+
+volumes:
+  postgres_data:
