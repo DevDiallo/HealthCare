@@ -25,7 +25,9 @@ import java.util.UUID;
 @Transactional
 public class PatientServiceImpl implements PatientService {
 
-    private static final Set<String> ALLOWED_SORT = Set.of("createdAt", "updatedAt", "firstName", "lastName", "email");
+        private static final Set<String> ALLOWED_SORT = Set.of(
+            "createdAt", "updatedAt", "firstName", "lastName", "email", "bloodType", "emergencyContact"
+        );
 
     private final PatientRepository repository;
     private final PatientMapper mapper;
@@ -71,7 +73,11 @@ public class PatientServiceImpl implements PatientService {
             spec = spec.and((root, query, cb) -> cb.or(
                     cb.like(cb.lower(root.get("firstName")), pattern),
                     cb.like(cb.lower(root.get("lastName")), pattern),
-                    cb.like(cb.lower(root.get("email")), pattern)
+                    cb.like(cb.lower(root.get("email")), pattern),
+                    cb.like(cb.lower(root.get("bloodType")), pattern),
+                    cb.like(cb.lower(root.get("allergies")), pattern),
+                    cb.like(cb.lower(root.get("chronicConditions")), pattern),
+                    cb.like(cb.lower(root.get("emergencyContact")), pattern)
             ));
         }
         var pageable = PageRequest.of(page, size, SortUtils.parseSort(sort, ALLOWED_SORT, "createdAt"));

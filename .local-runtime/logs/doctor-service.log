@@ -1,1 +1,75 @@
-start_service:8: command not found: nohup
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -------------------< com.healthcare:doctor-service >--------------------
+[INFO] Building Doctor Service 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:3.5.0:run (default-cli) > test-compile @ doctor-service >>>
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ doctor-service ---
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.14.0:compile (default-compile) @ doctor-service ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ doctor-service ---
+[INFO] Copying 1 resource from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.14.0:testCompile (default-testCompile) @ doctor-service ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] <<< spring-boot:3.5.0:run (default-cli) < test-compile @ doctor-service <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:3.5.0:run (default-cli) @ doctor-service ---
+[INFO] Attaching agents: []
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.5.0)
+
+2026-06-18T09:24:49.592+02:00  INFO 3761 --- [doctor-service] [           main] c.h.doctor.DoctorServiceApplication      : Starting DoctorServiceApplication using Java 21.0.11 with PID 3761 (/Users/diallo/Documents/ISOSET/HealthCare/backend/doctor-service/target/classes started by diallo in /Users/diallo/Documents/ISOSET/HealthCare/backend/doctor-service)
+2026-06-18T09:24:49.598+02:00  INFO 3761 --- [doctor-service] [           main] c.h.doctor.DoctorServiceApplication      : No active profile set, falling back to 1 default profile: "default"
+2026-06-18T09:24:54.132+02:00  INFO 3761 --- [doctor-service] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-06-18T09:24:54.395+02:00  INFO 3761 --- [doctor-service] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 243 ms. Found 1 JPA repository interface.
+2026-06-18T09:24:57.901+02:00  INFO 3761 --- [doctor-service] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8084 (http)
+2026-06-18T09:24:57.995+02:00  INFO 3761 --- [doctor-service] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-06-18T09:24:57.997+02:00  INFO 3761 --- [doctor-service] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.41]
+2026-06-18T09:24:58.367+02:00  INFO 3761 --- [doctor-service] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-06-18T09:24:58.384+02:00  INFO 3761 --- [doctor-service] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 8466 ms
+2026-06-18T09:24:59.868+02:00  INFO 3761 --- [doctor-service] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-06-18T09:25:00.184+02:00  INFO 3761 --- [doctor-service] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.15.Final
+2026-06-18T09:25:00.360+02:00  INFO 3761 --- [doctor-service] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-06-18T09:25:01.798+02:00  INFO 3761 --- [doctor-service] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-06-18T09:25:01.887+02:00  INFO 3761 --- [doctor-service] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-06-18T09:25:02.611+02:00  INFO 3761 --- [doctor-service] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@779b4f9c
+2026-06-18T09:25:02.614+02:00  INFO 3761 --- [doctor-service] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-06-18T09:25:02.913+02:00  INFO 3761 --- [doctor-service] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 16.14
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-06-18T09:25:06.967+02:00  INFO 3761 --- [doctor-service] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-06-18T09:25:07.317+02:00  INFO 3761 --- [doctor-service] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-06-18T09:25:09.528+02:00  WARN 3761 --- [doctor-service] [           main] .s.s.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: 3df26047-090a-43a7-a548-d11ca811e1a0
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-06-18T09:25:09.964+02:00  INFO 3761 --- [doctor-service] [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2026-06-18T09:25:14.267+02:00  INFO 3761 --- [doctor-service] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8084 (http) with context path '/'
+2026-06-18T09:25:14.335+02:00  INFO 3761 --- [doctor-service] [           main] c.h.doctor.DoctorServiceApplication      : Started DoctorServiceApplication in 28.256 seconds (process running for 30.502)
+2026-06-18T09:33:00.230+02:00  INFO 3761 --- [doctor-service] [nio-8084-exec-2] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-06-18T09:33:00.234+02:00  INFO 3761 --- [doctor-service] [nio-8084-exec-2] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-06-18T09:33:00.253+02:00  INFO 3761 --- [doctor-service] [nio-8084-exec-2] o.s.web.servlet.DispatcherServlet        : Completed initialization in 19 ms

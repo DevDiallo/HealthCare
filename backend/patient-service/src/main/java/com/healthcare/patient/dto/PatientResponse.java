@@ -9,6 +9,10 @@ public record PatientResponse(
         String firstName,
         String lastName,
         String email,
+        String bloodType,
+        String allergies,
+        String chronicConditions,
+        String emergencyContact,
         Instant createdAt,
         Instant updatedAt
 ) {

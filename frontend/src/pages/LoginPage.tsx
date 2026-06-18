@@ -1,6 +1,6 @@
 import { Formik, Form, Field } from 'formik'
 import * as Yup from 'yup'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { authApi } from '../services/authApi'
 import { useAppDispatch } from '../app/hooks'
 import { setSession } from '../features/auth/authSlice'
@@ -25,7 +25,7 @@ export default function LoginPage() {
             try {
               const payload = await authApi.login(values)
               dispatch(setSession(payload))
-              navigate('/dashboard')
+              navigate('/home')
             } catch {
               helpers.setStatus('Identifiants invalides')
             }
@@ -43,6 +43,7 @@ export default function LoginPage() {
 
               {status ? <small>{status}</small> : null}
               <button type="submit" disabled={isSubmitting}>Se connecter</button>
+              <Link to="/" className="auth-return-link">Retour a l'accueil</Link>
             </Form>
           )}
         </Formik>

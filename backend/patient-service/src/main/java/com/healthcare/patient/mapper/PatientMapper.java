@@ -14,6 +14,10 @@ public class PatientMapper {
         patient.setFirstName(request.firstName());
         patient.setLastName(request.lastName());
         patient.setEmail(request.email());
+        patient.setBloodType(request.bloodType());
+        patient.setAllergies(request.allergies());
+        patient.setChronicConditions(request.chronicConditions());
+        patient.setEmergencyContact(request.emergencyContact());
         return patient;
     }
 
@@ -21,6 +25,10 @@ public class PatientMapper {
         patient.setFirstName(request.firstName());
         patient.setLastName(request.lastName());
         patient.setEmail(request.email());
+        patient.setBloodType(request.bloodType());
+        patient.setAllergies(request.allergies());
+        patient.setChronicConditions(request.chronicConditions());
+        patient.setEmergencyContact(request.emergencyContact());
     }
 
     public PatientResponse toResponse(Patient patient) {
@@ -30,6 +38,10 @@ public class PatientMapper {
                 patient.getFirstName(),
                 patient.getLastName(),
                 patient.getEmail(),
+                patient.getBloodType(),
+                patient.getAllergies(),
+                patient.getChronicConditions(),
+                patient.getEmergencyContact(),
                 patient.getCreatedAt(),
                 patient.getUpdatedAt()
         );

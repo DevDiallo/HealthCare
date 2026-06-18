@@ -1,6 +1,6 @@
 import { Formik, Form, Field } from 'formik'
 import * as Yup from 'yup'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { authApi } from '../services/authApi'
 
 const schema = Yup.object({
@@ -71,6 +71,7 @@ export default function RegisterPage() {
 
               {status ? <small>{status}</small> : null}
               <button type="submit" disabled={isSubmitting}>Creer le compte</button>
+              <Link to="/" className="auth-return-link">Retour a l'accueil</Link>
             </Form>
           )}
         </Formik>
