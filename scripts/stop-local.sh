@@ -5,6 +5,8 @@ ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 RUNTIME_DIR="$ROOT_DIR/.local-runtime"
 PID_DIR="$RUNTIME_DIR/pids"
 NGINX_PREFIX="$RUNTIME_DIR/nginx"
+NGINX_DOCKER_CONTAINER_NAME="${NGINX_DOCKER_CONTAINER_NAME:-healthcare-local-nginx}"
+POSTGRES_DOCKER_CONTAINER_NAME="${POSTGRES_DOCKER_CONTAINER_NAME:-healthcare-local-postgres}"
 
 stop_pid_file() {
   local pid_file="$1"
@@ -20,6 +22,11 @@ stop_pid_file() {
 
 if command -v nginx >/dev/null 2>&1; then
   nginx -p "$NGINX_PREFIX" -c "$ROOT_DIR/gateway/nginx.local.conf" -s quit >/dev/null 2>&1 || true
+fi
+
+if command -v docker >/dev/null 2>&1; then
+  docker rm -f "$NGINX_DOCKER_CONTAINER_NAME" >/dev/null 2>&1 || true
+  docker rm -f "$POSTGRES_DOCKER_CONTAINER_NAME" >/dev/null 2>&1 || true
 fi
 
 if [ -d "$PID_DIR" ]; then

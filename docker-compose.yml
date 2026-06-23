@@ -1,4 +1,4 @@
-version: '3.9'
+version: "3.9"
 
 services:
   postgres:
@@ -9,14 +9,14 @@ services:
       POSTGRES_PASSWORD: healthcare
       POSTGRES_DB: healthcare_auth
     ports:
-      - '5432:5432'
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./db/init:/docker-entrypoint-initdb.d
     networks:
       - healthcare_net
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U healthcare']
+      test: ["CMD-SHELL", "pg_isready -U healthcare"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -120,8 +120,8 @@ services:
       - appointment-service
       - notification-service
     ports:
-      - '80:80'
-      - '443:443'
+      - "80:80"
+      - "443:443"
     volumes:
       - ./nginx/certs:/etc/nginx/certs:ro
     networks:

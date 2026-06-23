@@ -6,6 +6,11 @@ RUNTIME_DIR="$ROOT_DIR/.local-runtime"
 LOG_DIR="$RUNTIME_DIR/logs"
 PID_DIR="$RUNTIME_DIR/pids"
 NGINX_PREFIX="$RUNTIME_DIR/nginx"
+NGINX_DOCKER_CONTAINER_NAME="${NGINX_DOCKER_CONTAINER_NAME:-healthcare-local-nginx}"
+NGINX_DOCKER_IMAGE="${NGINX_DOCKER_IMAGE:-nginx:1.27-alpine}"
+POSTGRES_DOCKER_CONTAINER_NAME="${POSTGRES_DOCKER_CONTAINER_NAME:-healthcare-local-postgres}"
+POSTGRES_DOCKER_IMAGE="${POSTGRES_DOCKER_IMAGE:-postgres:16-alpine}"
+POSTGRES_DOCKER_VOLUME="$RUNTIME_DIR/postgres-data"
 
 DB_HOST="${DB_HOST:-localhost}"
 DB_PORT="${DB_PORT:-5432}"
@@ -16,12 +21,25 @@ JWT_SECRET_AUTH="${JWT_SECRET_AUTH:-MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYw
 JWT_SECRET_SERVICES="${JWT_SECRET_SERVICES:-0123456789ABCDEF0123456789ABCDEF}"
 
 mkdir -p "$LOG_DIR" "$PID_DIR" "$NGINX_PREFIX/logs" "$NGINX_PREFIX/client_body_temp" "$NGINX_PREFIX/proxy_temp" "$NGINX_PREFIX/fastcgi_temp" "$NGINX_PREFIX/uwsgi_temp" "$NGINX_PREFIX/scgi_temp"
+mkdir -p "$POSTGRES_DOCKER_VOLUME"
 
 require_cmd() {
   if ! command -v "$1" >/dev/null 2>&1; then
     echo "Missing required command: $1"
     exit 1
   fi
+}
+
+has_cmd() {
+  command -v "$1" >/dev/null 2>&1
+}
+
+docker_ready() {
+  has_cmd docker && docker info >/dev/null 2>&1
+}
+
+port_open() {
+  nc -z 127.0.0.1 "$1" >/dev/null 2>&1
 }
 
 stop_existing() {
@@ -40,6 +58,23 @@ create_databases_if_possible() {
   else
     echo "psql not found: skipping automatic database creation"
   fi
+}
+
+create_databases_in_container() {
+  local container_name="$1"
+  local dbs=(healthcare_auth healthcare_hospital healthcare_patient healthcare_doctor healthcare_appointment healthcare_notification)
+
+  for db in "${dbs[@]}"; do
+    docker exec \
+      -e PGPASSWORD="$DB_PASSWORD" \
+      "$container_name" \
+      psql -U "$DB_USERNAME" -d postgres -tc "SELECT 1 FROM pg_database WHERE datname='${db}'" \
+      | grep -q 1 || \
+      docker exec \
+      -e PGPASSWORD="$DB_PASSWORD" \
+      "$container_name" \
+      psql -U "$DB_USERNAME" -d postgres -c "CREATE DATABASE ${db};" >/dev/null
+  done
 }
 
 wait_port() {
@@ -90,16 +125,71 @@ start_frontend() {
   )
 }
 
+start_postgres_if_needed() {
+  if port_open 5432; then
+    echo "Using existing PostgreSQL on port 5432"
+    return 0
+  fi
+
+  if ! has_cmd docker; then
+    echo "PostgreSQL not available on 5432 and docker is missing"
+    exit 1
+  fi
+
+  if ! docker_ready; then
+    echo "PostgreSQL not available on 5432 but the Docker daemon is not running; start Docker/Colima and retry"
+    exit 1
+  fi
+
+  echo "PostgreSQL not found on 5432, starting Docker image $POSTGRES_DOCKER_IMAGE"
+  docker rm -f "$POSTGRES_DOCKER_CONTAINER_NAME" >/dev/null 2>&1 || true
+  docker pull "$POSTGRES_DOCKER_IMAGE" >/dev/null
+  docker run -d \
+    --name "$POSTGRES_DOCKER_CONTAINER_NAME" \
+    -e POSTGRES_USER="$DB_USERNAME" \
+    -e POSTGRES_PASSWORD="$DB_PASSWORD" \
+    -e POSTGRES_DB=healthcare_auth \
+    -p 5432:5432 \
+    -v "$POSTGRES_DOCKER_VOLUME:/var/lib/postgresql/data" \
+    "$POSTGRES_DOCKER_IMAGE" >/dev/null
+
+  wait_port 5432 postgres
+  create_databases_in_container "$POSTGRES_DOCKER_CONTAINER_NAME"
+}
+
 start_nginx_gateway() {
-  nginx -p "$NGINX_PREFIX" -c "$ROOT_DIR/gateway/nginx.local.conf"
+  if has_cmd nginx; then
+    echo "Starting local nginx binary"
+    nginx -p "$NGINX_PREFIX" -c "$ROOT_DIR/gateway/nginx.local.conf"
+    return 0
+  fi
+
+  if ! has_cmd docker; then
+    echo "Missing required command: nginx or docker"
+    exit 1
+  fi
+
+  if ! docker_ready; then
+    echo "Docker is installed but the daemon is not running; start Docker/Colima and retry"
+    exit 1
+  fi
+
+  echo "nginx not found, starting gateway with Docker image $NGINX_DOCKER_IMAGE"
+  docker rm -f "$NGINX_DOCKER_CONTAINER_NAME" >/dev/null 2>&1 || true
+  docker pull "$NGINX_DOCKER_IMAGE" >/dev/null
+  docker run -d \
+    --name "$NGINX_DOCKER_CONTAINER_NAME" \
+    -p 8080:8080 \
+    -v "$ROOT_DIR/gateway/nginx.local.conf:/etc/nginx/nginx.conf:ro" \
+    "$NGINX_DOCKER_IMAGE" >/dev/null
 }
 
 require_cmd mvn
 require_cmd npm
-require_cmd nginx
 require_cmd nc
 
 stop_existing
+start_postgres_if_needed
 create_databases_if_possible
 
 start_service auth-service backend/auth-service 8081 healthcare_auth "$JWT_SECRET_AUTH"
