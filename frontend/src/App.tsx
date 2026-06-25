@@ -35,18 +35,48 @@ export default function App() {
           <Route path="/home" element={<DefaultRoute />} />
 
           {/* Espace patient */}
-          <Route path="/patient-space" element={<Navigate to="/patient-dashboard" replace />} />
-          <Route path="/patient-dashboard" element={<PatientSpacePage initialTab="dashboard" />} />
-          <Route path="/patient-medical-record" element={<PatientSpacePage initialTab="dossier" />} />
-          <Route path="/patient-appointments" element={<PatientSpacePage initialTab="appointments" />} />
-          <Route path="/patient-contact" element={<PatientSpacePage initialTab="messages" />} />
+          <Route
+            path="/patient-space"
+            element={<Navigate to="/patient-dashboard" replace />}
+          />
+          <Route
+            path="/patient-dashboard"
+            element={<PatientSpacePage initialTab="dashboard" />}
+          />
+          <Route
+            path="/patient-medical-record"
+            element={<PatientSpacePage initialTab="dossier" />}
+          />
+          <Route
+            path="/patient-appointments"
+            element={<PatientSpacePage initialTab="appointments" />}
+          />
+          <Route
+            path="/patient-contact"
+            element={<PatientSpacePage initialTab="messages" />}
+          />
 
           {/* Espace médecin */}
-          <Route path="/doctor-space" element={<Navigate to="/doctor-dashboard" replace />} />
-          <Route path="/doctor-dashboard" element={<DoctorSpacePage initialTab="dashboard" />} />
-          <Route path="/doctor-patients" element={<DoctorSpacePage initialTab="patients" />} />
-          <Route path="/doctor-appointments" element={<DoctorSpacePage initialTab="planning" />} />
-          <Route path="/doctor-contact" element={<DoctorSpacePage initialTab="messages" />} />
+          <Route
+            path="/doctor-space"
+            element={<Navigate to="/doctor-dashboard" replace />}
+          />
+          <Route
+            path="/doctor-dashboard"
+            element={<DoctorSpacePage initialTab="dashboard" />}
+          />
+          <Route
+            path="/doctor-patients"
+            element={<DoctorSpacePage initialTab="patients" />}
+          />
+          <Route
+            path="/doctor-appointments"
+            element={<DoctorSpacePage initialTab="planning" />}
+          />
+          <Route
+            path="/doctor-contact"
+            element={<DoctorSpacePage initialTab="messages" />}
+          />
 
           {/* Back-office admin */}
           <Route path="/dashboard" element={<DashboardPage />} />

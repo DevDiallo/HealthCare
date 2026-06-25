@@ -41,7 +41,9 @@ const STATUS_CLASS: Record<string, string> = {
   CANCELLED: "badge badge-cancelled",
 };
 
-export default function DoctorSpacePage({ initialTab = "dashboard" }: DoctorSpaceProps) {
+export default function DoctorSpacePage({
+  initialTab = "dashboard",
+}: DoctorSpaceProps) {
   const userId = useAppSelector((state) => state.auth.userId);
 
   const [tab, setTab] = useState<Tab>(initialTab);
@@ -320,7 +322,9 @@ export default function DoctorSpacePage({ initialTab = "dashboard" }: DoctorSpac
               <li>Rendez-vous confirmés: {confirmed.length}</li>
               <li>Rendez-vous en attente: {pending.length}</li>
               <li>Rendez-vous annulés: {cancelled.length}</li>
-              <li>Patients avec points de vigilance: {patientsWithAlerts.length}</li>
+              <li>
+                Patients avec points de vigilance: {patientsWithAlerts.length}
+              </li>
             </ul>
           </div>
 
@@ -332,7 +336,8 @@ export default function DoctorSpacePage({ initialTab = "dashboard" }: DoctorSpac
             <ul className="timeline-list">
               {patientsByFollowup.map((entry) => (
                 <li key={entry.patient.id}>
-                  {entry.patient.firstName} {entry.patient.lastName} - {entry.visits} consultation(s)
+                  {entry.patient.firstName} {entry.patient.lastName} -{" "}
+                  {entry.visits} consultation(s)
                 </li>
               ))}
             </ul>
@@ -348,7 +353,10 @@ export default function DoctorSpacePage({ initialTab = "dashboard" }: DoctorSpac
                 const patient = patientById[appt.patientId];
                 return (
                   <li key={appt.id}>
-                    {dateTimeLabel(appt.appointmentAt)} - {patient ? `${patient.firstName} ${patient.lastName}` : appt.patientId}
+                    {dateTimeLabel(appt.appointmentAt)} -{" "}
+                    {patient
+                      ? `${patient.firstName} ${patient.lastName}`
+                      : appt.patientId}
                   </li>
                 );
               })}
@@ -379,7 +387,7 @@ export default function DoctorSpacePage({ initialTab = "dashboard" }: DoctorSpac
       {tab === "planning" && (
         <div className="profile-card">
           <h3>Rendez-vous à traiter</h3>
-            {loading && <p className="muted">Chargement...</p>}
+          {loading && <p className="muted">Chargement...</p>}
           {!loading && !myAppointments.length && (
             <p className="muted">Aucun rendez-vous pour le moment.</p>
           )}
@@ -398,7 +406,9 @@ export default function DoctorSpacePage({ initialTab = "dashboard" }: DoctorSpac
                         : appt.patientId}
                     </span>
                     {patient?.allergies && (
-                      <span className="appt-alert">Alerte: {patient.allergies}</span>
+                      <span className="appt-alert">
+                        Alerte: {patient.allergies}
+                      </span>
                     )}
                   </div>
                   <div className="appt-right">

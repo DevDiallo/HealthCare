@@ -46,7 +46,9 @@ const STATUS_CLASS: Record<string, string> = {
   CANCELLED: "badge badge-cancelled",
 };
 
-export default function PatientSpacePage({ initialTab = "appointments" }: PatientSpaceProps) {
+export default function PatientSpacePage({
+  initialTab = "appointments",
+}: PatientSpaceProps) {
   const userId = useAppSelector((state) => state.auth.userId);
 
   const [tab, setTab] = useState<"dashboard" | Tab>(initialTab);
@@ -237,8 +239,11 @@ export default function PatientSpacePage({ initialTab = "appointments" }: Patien
             <ul className="timeline-list">
               <li>Total rendez-vous: {myAppointments.length}</li>
               <li>
-                Rendez-vous a venir: {
-                  myAppointments.filter((a) => new Date(a.appointmentAt).getTime() >= Date.now()).length
+                Rendez-vous a venir:{" "}
+                {
+                  myAppointments.filter(
+                    (a) => new Date(a.appointmentAt).getTime() >= Date.now(),
+                  ).length
                 }
               </li>
               <li>Messages recus: {messages.length}</li>

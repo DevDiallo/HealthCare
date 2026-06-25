@@ -1,7 +1,7 @@
-import { Formik, Form, Field } from 'formik'
-import * as Yup from 'yup'
-import { Link, useNavigate } from 'react-router-dom'
-import { authApi } from '../services/authApi'
+import { Formik, Form, Field } from "formik";
+import * as Yup from "yup";
+import { Link, useNavigate } from "react-router-dom";
+import { authApi } from "../services/authApi";
 
 const schema = Yup.object({
   firstName: Yup.string().required(),
@@ -11,10 +11,10 @@ const schema = Yup.object({
   password: Yup.string().min(8).required(),
   hospitalId: Yup.number().required(),
   role: Yup.string().required(),
-})
+});
 
 export default function RegisterPage() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   return (
     <section className="auth-shell">
@@ -22,21 +22,21 @@ export default function RegisterPage() {
         <h1>Inscription</h1>
         <Formik
           initialValues={{
-            firstName: '',
-            lastName: '',
-            email: '',
-            phone: '',
-            password: '',
+            firstName: "",
+            lastName: "",
+            email: "",
+            phone: "",
+            password: "",
             hospitalId: 1,
-            role: 'PATIENT',
+            role: "PATIENT",
           }}
           validationSchema={schema}
           onSubmit={async (values, helpers) => {
             try {
-              await authApi.register(values as never)
-              navigate('/login')
+              await authApi.register(values as never);
+              navigate("/login");
             } catch {
-              helpers.setStatus('Inscription impossible')
+              helpers.setStatus("Inscription impossible");
             }
           }}
         >
@@ -70,12 +70,16 @@ export default function RegisterPage() {
               </Field>
 
               {status ? <small>{status}</small> : null}
-              <button type="submit" disabled={isSubmitting}>Creer le compte</button>
-              <Link to="/" className="auth-return-link">Retour a l'accueil</Link>
+              <button type="submit" disabled={isSubmitting}>
+                Creer le compte
+              </button>
+              <Link to="/" className="auth-return-link">
+                Retour a l'accueil
+              </Link>
             </Form>
           )}
         </Formik>
       </div>
     </section>
-  )
+  );
 }
