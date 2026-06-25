@@ -58,8 +58,16 @@ body {
   border-radius: 32px;
   padding: 3rem;
   background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(237, 244, 242, 0.88)),
-    radial-gradient(circle at top left, rgba(15, 118, 110, 0.16), transparent 34%);
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.96),
+      rgba(237, 244, 242, 0.88)
+    ),
+    radial-gradient(
+      circle at top left,
+      rgba(15, 118, 110, 0.16),
+      transparent 34%
+    );
 }
 
 .landing-kicker,
@@ -158,8 +166,16 @@ body {
   display: grid;
   gap: 1rem;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(219, 234, 254, 0.56)),
-    radial-gradient(circle at top right, rgba(17, 94, 89, 0.18), transparent 30%);
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.92),
+      rgba(219, 234, 254, 0.56)
+    ),
+    radial-gradient(
+      circle at top right,
+      rgba(17, 94, 89, 0.18),
+      transparent 30%
+    );
 }
 
 .landing-panel-card {
@@ -253,7 +269,11 @@ body {
 }
 
 .landing-story-card {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(240, 253, 250, 0.84));
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.96),
+    rgba(240, 253, 250, 0.84)
+  );
 }
 
 .landing-journey-list {
@@ -275,7 +295,11 @@ body {
   align-items: center;
   justify-content: center;
   border-radius: 16px;
-  background: linear-gradient(135deg, rgba(15, 118, 110, 0.12), rgba(17, 94, 89, 0.24));
+  background: linear-gradient(
+    135deg,
+    rgba(15, 118, 110, 0.12),
+    rgba(17, 94, 89, 0.24)
+  );
   color: var(--brand-2);
   font-family: "Space Grotesk", sans-serif;
 }
@@ -288,7 +312,11 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  background: linear-gradient(135deg, rgba(27, 40, 48, 0.98), rgba(15, 118, 110, 0.95));
+  background: linear-gradient(
+    135deg,
+    rgba(27, 40, 48, 0.98),
+    rgba(15, 118, 110, 0.95)
+  );
 }
 
 .landing-cta-band span,
