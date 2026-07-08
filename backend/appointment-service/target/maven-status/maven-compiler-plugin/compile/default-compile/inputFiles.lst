@@ -1,4 +1,6 @@
 /Users/diallo/Documents/ISOSET/HealthCare/backend/appointment-service/src/main/java/com/healthcare/appointment/AppointmentServiceApplication.java
+/Users/diallo/Documents/ISOSET/HealthCare/backend/appointment-service/src/main/java/com/healthcare/appointment/client/DoctorServiceClient.java
+/Users/diallo/Documents/ISOSET/HealthCare/backend/appointment-service/src/main/java/com/healthcare/appointment/client/PatientServiceClient.java
 /Users/diallo/Documents/ISOSET/HealthCare/backend/appointment-service/src/main/java/com/healthcare/appointment/config/AppProperties.java
 /Users/diallo/Documents/ISOSET/HealthCare/backend/appointment-service/src/main/java/com/healthcare/appointment/config/OpenApiConfig.java
 /Users/diallo/Documents/ISOSET/HealthCare/backend/appointment-service/src/main/java/com/healthcare/appointment/controller/AppointmentController.java
@@ -7,6 +9,8 @@
 /Users/diallo/Documents/ISOSET/HealthCare/backend/appointment-service/src/main/java/com/healthcare/appointment/dto/AppointmentUpdateRequest.java
 /Users/diallo/Documents/ISOSET/HealthCare/backend/appointment-service/src/main/java/com/healthcare/appointment/entity/Appointment.java
 /Users/diallo/Documents/ISOSET/HealthCare/backend/appointment-service/src/main/java/com/healthcare/appointment/entity/AppointmentStatus.java
+/Users/diallo/Documents/ISOSET/HealthCare/backend/appointment-service/src/main/java/com/healthcare/appointment/event/AppointmentEvent.java
+/Users/diallo/Documents/ISOSET/HealthCare/backend/appointment-service/src/main/java/com/healthcare/appointment/event/AppointmentEventPublisher.java
 /Users/diallo/Documents/ISOSET/HealthCare/backend/appointment-service/src/main/java/com/healthcare/appointment/exception/ApiErrorResponse.java
 /Users/diallo/Documents/ISOSET/HealthCare/backend/appointment-service/src/main/java/com/healthcare/appointment/exception/BusinessException.java
 /Users/diallo/Documents/ISOSET/HealthCare/backend/appointment-service/src/main/java/com/healthcare/appointment/exception/GlobalExceptionHandler.java

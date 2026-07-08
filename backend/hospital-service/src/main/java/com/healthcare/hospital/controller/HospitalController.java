@@ -22,7 +22,7 @@ public class HospitalController {
         this.hospitalService = hospitalService;
     }
 
-    @PostMapping
+    @PostMapping({"", "/"})
     public ApiResponse<HospitalResponse> create(@Valid @RequestBody HospitalCreateRequest request) {
         return ApiResponse.ok("Hospital created", hospitalService.create(request));
     }
@@ -53,7 +53,7 @@ public class HospitalController {
         return ApiResponse.ok("Hospital suspended", hospitalService.suspend(id));
     }
 
-    @GetMapping
+    @GetMapping({"", "/"})
     public ApiResponse<PageResponse<HospitalResponse>> list(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) HospitalStatus status,

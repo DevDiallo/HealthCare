@@ -12,6 +12,7 @@ import javax.crypto.SecretKey;
 import java.time.Instant;
 import java.util.Date;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class JwtService {
@@ -25,11 +26,12 @@ public class JwtService {
     }
 
     public String generateAccessToken(Long userId, Long hospitalId, Role role) {
-        return generateToken(userId, hospitalId, role, properties.getExpiration());
+        return generateToken(userId, hospitalId, role, properties.getExpiration(), String.valueOf(userId));
     }
 
     public String generateRefreshToken(Long userId, Long hospitalId, Role role) {
-        return generateToken(userId, hospitalId, role, properties.getRefreshExpiration());
+        String refreshSubject = userId + "-" + UUID.randomUUID().toString().substring(0, 8);
+        return generateToken(userId, hospitalId, role, properties.getRefreshExpiration(), refreshSubject);
     }
 
     public Claims extractClaims(String token) {
@@ -43,24 +45,30 @@ public class JwtService {
     public CurrentUser extractCurrentUser(String token) {
         Claims claims = extractClaims(token);
         return CurrentUser.builder()
-                .userId(claims.get("userId", Long.class))
-                .hospitalId(claims.get("hospitalId", Long.class))
+                .userId(claims.get("authUserId", Long.class))
+                .hospitalId(claims.get("authHospitalId", Long.class))
                 .role(Role.valueOf(claims.get("role", String.class)))
                 .build();
     }
 
-    private String generateToken(Long userId, Long hospitalId, Role role, long expiration) {
+    private String generateToken(Long userId, Long hospitalId, Role role, long expiration, String subject) {
         Instant now = Instant.now();
         return Jwts.builder()
                 .claims(Map.of(
-                        "userId", userId,
-                        "hospitalId", hospitalId,
+                        "userId", toScopedUuid("user", userId).toString(),
+                        "hospitalId", toScopedUuid("hospital", hospitalId).toString(),
+                        "authUserId", userId,
+                        "authHospitalId", hospitalId,
                         "role", role.name()
                 ))
-                .subject(String.valueOf(userId))
+                .subject(subject)
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(now.plusMillis(expiration)))
                 .signWith(secretKey)
                 .compact();
+    }
+
+    private UUID toScopedUuid(String scope, Long value) {
+        return UUID.nameUUIDFromBytes((scope + ":" + value).getBytes());
     }
 }

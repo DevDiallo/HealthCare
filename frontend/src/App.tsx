@@ -29,6 +29,7 @@ export default function App() {
       <Route path="/" element={<HomePage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/patients-dashbord" element={<DefaultRoute />} />
 
       <Route element={<PrivateRoute />}>
         <Route element={<AppLayout />}>

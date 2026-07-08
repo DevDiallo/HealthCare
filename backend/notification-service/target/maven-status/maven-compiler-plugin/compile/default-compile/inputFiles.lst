@@ -7,6 +7,8 @@
 /Users/diallo/Documents/ISOSET/HealthCare/backend/notification-service/src/main/java/com/healthcare/notification/dto/NotificationUpdateRequest.java
 /Users/diallo/Documents/ISOSET/HealthCare/backend/notification-service/src/main/java/com/healthcare/notification/entity/Notification.java
 /Users/diallo/Documents/ISOSET/HealthCare/backend/notification-service/src/main/java/com/healthcare/notification/entity/NotificationStatus.java
+/Users/diallo/Documents/ISOSET/HealthCare/backend/notification-service/src/main/java/com/healthcare/notification/event/AppointmentEvent.java
+/Users/diallo/Documents/ISOSET/HealthCare/backend/notification-service/src/main/java/com/healthcare/notification/event/AppointmentEventConsumer.java
 /Users/diallo/Documents/ISOSET/HealthCare/backend/notification-service/src/main/java/com/healthcare/notification/exception/ApiErrorResponse.java
 /Users/diallo/Documents/ISOSET/HealthCare/backend/notification-service/src/main/java/com/healthcare/notification/exception/BusinessException.java
 /Users/diallo/Documents/ISOSET/HealthCare/backend/notification-service/src/main/java/com/healthcare/notification/exception/GlobalExceptionHandler.java

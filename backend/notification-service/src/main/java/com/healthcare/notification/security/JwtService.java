@@ -21,12 +21,39 @@ public class JwtService {
 
     public CurrentUser parse(String token) {
         Claims claims = Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload();
-        String roleRaw = claims.get("role", String.class);
-        String hospitalRaw = claims.get("hospitalId", String.class);
+        String roleRaw = asString(claims.get("role"));
+        UUID userId = parseUuidOrNull(claims.get("userId"));
+        UUID hospitalId = parseUuidOrNull(claims.get("hospitalId"));
+
+        if (userId == null) {
+            userId = UUID.nameUUIDFromBytes(
+                    ("user:" + String.valueOf(claims.get("userId"))).getBytes(StandardCharsets.UTF_8)
+            );
+        }
+
         return new CurrentUser(
-                UUID.fromString(claims.get("userId", String.class)),
-                hospitalRaw == null || hospitalRaw.isBlank() ? null : UUID.fromString(hospitalRaw),
+                userId,
+                hospitalId,
                 roleRaw == null ? UserRole.PATIENT : UserRole.valueOf(roleRaw)
         );
+    }
+
+    private static String asString(Object value) {
+        return value == null ? null : String.valueOf(value);
+    }
+
+    private static UUID parseUuidOrNull(Object rawValue) {
+        if (rawValue == null) {
+            return null;
+        }
+        String value = String.valueOf(rawValue).trim();
+        if (value.isEmpty()) {
+            return null;
+        }
+        try {
+            return UUID.fromString(value);
+        } catch (IllegalArgumentException ex) {
+            return null;
+        }
     }
 }

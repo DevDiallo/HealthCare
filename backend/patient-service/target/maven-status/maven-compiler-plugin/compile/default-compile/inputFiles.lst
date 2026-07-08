@@ -1,4 +1,5 @@
 /Users/diallo/Documents/ISOSET/HealthCare/backend/patient-service/src/main/java/com/healthcare/patient/PatientServiceApplication.java
+/Users/diallo/Documents/ISOSET/HealthCare/backend/patient-service/src/main/java/com/healthcare/patient/client/DoctorServiceClient.java
 /Users/diallo/Documents/ISOSET/HealthCare/backend/patient-service/src/main/java/com/healthcare/patient/config/AppProperties.java
 /Users/diallo/Documents/ISOSET/HealthCare/backend/patient-service/src/main/java/com/healthcare/patient/config/OpenApiConfig.java
 /Users/diallo/Documents/ISOSET/HealthCare/backend/patient-service/src/main/java/com/healthcare/patient/controller/PatientController.java

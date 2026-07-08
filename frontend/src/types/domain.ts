@@ -1,5 +1,6 @@
 export type PageResponse<T> = {
-  content: T[];
+  content?: T[];
+  items?: T[];
   page: number;
   size: number;
   totalElements: number;
@@ -28,6 +29,8 @@ export type Hospital = {
 export type Patient = {
   id: string;
   hospitalId: string;
+  userAccountId?: string | null;
+  assignedDoctorUserId?: string | null;
   firstName: string;
   lastName: string;
   email: string;
@@ -42,6 +45,7 @@ export type Patient = {
 export type Doctor = {
   id: string;
   hospitalId: string;
+  userAccountId?: string | null;
   firstName: string;
   lastName: string;
   speciality: string;

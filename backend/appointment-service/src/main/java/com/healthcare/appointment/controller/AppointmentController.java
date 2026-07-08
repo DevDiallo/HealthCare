@@ -22,7 +22,7 @@ public class AppointmentController {
         this.appointmentService = appointmentService;
     }
 
-    @PostMapping
+    @PostMapping({"", "/"})
     public ApiResponse<AppointmentResponse> create(@Valid @RequestBody AppointmentCreateRequest request) {
         return ApiResponse.ok("Appointment created", appointmentService.create(request));
     }
@@ -53,7 +53,7 @@ public class AppointmentController {
         return ApiResponse.ok("Appointment cancelled", appointmentService.cancel(id));
     }
 
-    @GetMapping
+    @GetMapping({"", "/"})
     public ApiResponse<PageResponse<AppointmentResponse>> list(
             @RequestParam(required = false) AppointmentStatus status,
             @RequestParam(defaultValue = "0") int page,

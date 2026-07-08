@@ -13,6 +13,8 @@ public interface DoctorService {
 
     DoctorResponse getById(UUID id);
 
+    DoctorResponse getByUserAccountId(UUID userAccountId);
+
     DoctorResponse update(UUID id, DoctorUpdateRequest request);
 
     void delete(UUID id);

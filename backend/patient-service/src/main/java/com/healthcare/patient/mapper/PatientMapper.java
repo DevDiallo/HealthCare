@@ -11,6 +11,8 @@ public class PatientMapper {
 
     public Patient toEntity(PatientCreateRequest request) {
         Patient patient = new Patient();
+        patient.setUserAccountId(request.userAccountId());
+        patient.setAssignedDoctorUserId(request.assignedDoctorUserId());
         patient.setFirstName(request.firstName());
         patient.setLastName(request.lastName());
         patient.setEmail(request.email());
@@ -22,6 +24,8 @@ public class PatientMapper {
     }
 
     public void merge(Patient patient, PatientUpdateRequest request) {
+        patient.setUserAccountId(request.userAccountId());
+        patient.setAssignedDoctorUserId(request.assignedDoctorUserId());
         patient.setFirstName(request.firstName());
         patient.setLastName(request.lastName());
         patient.setEmail(request.email());
@@ -35,6 +39,8 @@ public class PatientMapper {
         return new PatientResponse(
                 patient.getId(),
                 patient.getHospitalId(),
+            patient.getUserAccountId(),
+            patient.getAssignedDoctorUserId(),
                 patient.getFirstName(),
                 patient.getLastName(),
                 patient.getEmail(),

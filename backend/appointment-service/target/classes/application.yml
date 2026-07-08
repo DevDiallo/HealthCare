@@ -1,6 +1,11 @@
 spring:
   application:
     name: appointment-service
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/healthcare_appointment}
     username: ${DB_USERNAME:healthcare}
@@ -15,5 +20,9 @@ server:
   port: ${SERVER_PORT:8085}
 
 app:
-  jwt-secret: ${JWT_SECRET:0123456789ABCDEF0123456789ABCDEF}
+  jwt-secret: ${JWT_SECRET:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef}
   jwt-expiration-seconds: ${JWT_EXPIRATION_SECONDS:3600}
+  patient-service-base-url: ${PATIENT_SERVICE_BASE_URL:http://localhost:8083}
+  doctor-service-base-url: ${DOCTOR_SERVICE_BASE_URL:http://localhost:8084}
+  kafka:
+    appointment-topic: ${APPOINTMENT_EVENTS_TOPIC:appointment-events}

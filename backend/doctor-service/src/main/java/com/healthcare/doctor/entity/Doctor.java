@@ -16,6 +16,9 @@ public class Doctor {
     @Column(nullable = false)
     private UUID hospitalId;
 
+    @Column
+    private UUID userAccountId;
+
     @Column(nullable = false)
     private String firstName;
 
@@ -47,6 +50,8 @@ public class Doctor {
     public void setId(UUID id) { this.id = id; }
     public UUID getHospitalId() { return hospitalId; }
     public void setHospitalId(UUID hospitalId) { this.hospitalId = hospitalId; }
+    public UUID getUserAccountId() { return userAccountId; }
+    public void setUserAccountId(UUID userAccountId) { this.userAccountId = userAccountId; }
     public String getFirstName() { return firstName; }
     public void setFirstName(String firstName) { this.firstName = firstName; }
     public String getLastName() { return lastName; }

@@ -7,6 +7,8 @@ import java.util.UUID;
 
 public record PatientCreateRequest(
         UUID hospitalId,
+        UUID userAccountId,
+        UUID assignedDoctorUserId,
         @NotBlank(message = "firstName is required") String firstName,
         @NotBlank(message = "lastName is required") String lastName,
         @Email(message = "email is invalid") @NotBlank(message = "email is required") String email,

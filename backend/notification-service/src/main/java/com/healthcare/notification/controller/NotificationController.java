@@ -21,7 +21,7 @@ public class NotificationController {
         this.notificationService = notificationService;
     }
 
-    @PostMapping
+    @PostMapping({"", "/"})
     public ApiResponse<NotificationResponse> create(@Valid @RequestBody NotificationCreateRequest request) {
         return ApiResponse.ok("Notification created", notificationService.create(request));
     }
@@ -47,7 +47,7 @@ public class NotificationController {
         return ApiResponse.ok("Notification sent", notificationService.send(id));
     }
 
-    @GetMapping
+    @GetMapping({"", "/"})
     public ApiResponse<PageResponse<NotificationResponse>> list(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
