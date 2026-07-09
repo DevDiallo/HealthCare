@@ -15,6 +15,9 @@ public class AppProperties {
     @Positive
     private long jwtExpirationSeconds = 3600;
 
+    @NotBlank
+    private String doctorServiceBaseUrl = "http://localhost:8084";
+
     public String getJwtSecret() {
         return jwtSecret;
     }
@@ -29,5 +32,13 @@ public class AppProperties {
 
     public void setJwtExpirationSeconds(long jwtExpirationSeconds) {
         this.jwtExpirationSeconds = jwtExpirationSeconds;
+    }
+
+    public String getDoctorServiceBaseUrl() {
+        return doctorServiceBaseUrl;
+    }
+
+    public void setDoctorServiceBaseUrl(String doctorServiceBaseUrl) {
+        this.doctorServiceBaseUrl = doctorServiceBaseUrl;
     }
 }

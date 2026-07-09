@@ -6,7 +6,6 @@ import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import PageHeader from "../components/PageHeader";
 import { domainApi } from "../services/domainApi";
-import { useAppSelector } from "../app/hooks";
 import type {
   ApiEnvelope,
   Appointment,
@@ -49,8 +48,6 @@ const STATUS_CLASS: Record<string, string> = {
 export default function PatientSpacePage({
   initialTab = "appointments",
 }: PatientSpaceProps) {
-  const userId = useAppSelector((state) => state.auth.userId);
-
   const [tab, setTab] = useState<"dashboard" | Tab>(initialTab);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
@@ -75,6 +72,10 @@ export default function PatientSpacePage({
     () => Object.fromEntries(doctors.map((d) => [d.id, d])),
     [doctors],
   );
+  const doctorByUserAccountId = useMemo(
+    () => Object.fromEntries(doctors.map((d) => [d.userAccountId || d.id, d])),
+    [doctors],
+  );
 
   async function loadAll() {
     setLoading(true);
@@ -94,23 +95,21 @@ export default function PatientSpacePage({
         (docRes.data as ApiEnvelope<PageResponse<Doctor>>)?.data?.content || [],
       );
 
-      const allNotifications =
-        (notifRes.data as ApiEnvelope<PageResponse<Notification>>)?.data
-          ?.content || [];
-      const myMessages = allNotifications.filter(
-        (n) => String(n.recipientUserId) === String(userId),
-      );
-      setMessages(myMessages);
-
-      // find own patient profile by userId match (best-effort)
       const allPatients =
         (patientsRes.data as ApiEnvelope<PageResponse<Patient>>)?.data
           ?.content || [];
-      const me =
-        allPatients.find((p) => String(p.id) === String(userId)) ||
-        allPatients[0] ||
-        null;
+      const me = allPatients[0] || null;
       setMyProfile(me);
+
+      const allNotifications =
+        (notifRes.data as ApiEnvelope<PageResponse<Notification>>)?.data
+          ?.content || [];
+      const myMessages = allNotifications.filter((n) =>
+        me
+          ? String(n.recipientUserId) === String(me.userAccountId || me.id)
+          : false,
+      );
+      setMessages(myMessages);
     } catch {
       setError("Impossible de charger vos données. Réessayez.");
     } finally {
@@ -127,10 +126,19 @@ export default function PatientSpacePage({
     setTab(initialTab);
   }, [initialTab]);
 
-  const myAppointments = appointments.sort(
-    (a, b) =>
-      new Date(b.appointmentAt).getTime() - new Date(a.appointmentAt).getTime(),
-  );
+  const myAppointments = appointments
+    .filter(
+      (appointment) => !myProfile || appointment.patientId === myProfile.id,
+    )
+    .sort(
+      (a, b) =>
+        new Date(b.appointmentAt).getTime() -
+        new Date(a.appointmentAt).getTime(),
+    );
+
+  const assignedDoctor = myProfile?.assignedDoctorUserId
+    ? doctorByUserAccountId[myProfile.assignedDoctorUserId]
+    : null;
 
   async function onBookAppointment(e: FormEvent) {
     e.preventDefault();
@@ -138,7 +146,11 @@ export default function PatientSpacePage({
     setError(null);
     setSuccess(null);
     try {
+      if (!myProfile) {
+        throw new Error("missing patient profile");
+      }
       await domainApi.createAppointment({
+        patientId: myProfile.id,
         doctorId: bookingForm.doctorId,
         appointmentAt: new Date(bookingForm.appointmentAt)
           .toISOString()
@@ -247,6 +259,12 @@ export default function PatientSpacePage({
                 }
               </li>
               <li>Messages recus: {messages.length}</li>
+              <li>
+                Médecin affecté:{" "}
+                {assignedDoctor
+                  ? `Dr ${assignedDoctor.firstName} ${assignedDoctor.lastName}`
+                  : "Non affecté"}
+              </li>
             </ul>
           </div>
           <div className="profile-card">
@@ -273,11 +291,11 @@ export default function PatientSpacePage({
               required
             >
               <option value="">Sélectionner…</option>
-              {doctors.map((d) => (
-                <option key={d.id} value={d.id}>
-                  {`Dr ${d.firstName} ${d.lastName} — ${d.speciality}`}
+              {assignedDoctor ? (
+                <option key={assignedDoctor.id} value={assignedDoctor.id}>
+                  {`Dr ${assignedDoctor.firstName} ${assignedDoctor.lastName} — ${assignedDoctor.speciality}`}
                 </option>
-              ))}
+              ) : null}
             </select>
             <label>Date et heure souhaitées</label>
             <input
@@ -352,6 +370,12 @@ export default function PatientSpacePage({
                 </dd>
                 <dt>Email</dt>
                 <dd>{myProfile.email}</dd>
+                <dt>Médecin affecté</dt>
+                <dd>
+                  {assignedDoctor
+                    ? `Dr ${assignedDoctor.firstName} ${assignedDoctor.lastName} — ${assignedDoctor.speciality}`
+                    : "Non affecté"}
+                </dd>
                 <dt>Groupe sanguin</dt>
                 <dd>
                   {myProfile.bloodType || (
@@ -418,7 +442,11 @@ export default function PatientSpacePage({
             >
               <option value="">Sélectionner…</option>
               {doctors.map((d) => (
-                <option key={d.id} value={d.id}>
+                <option
+                  key={d.id}
+                  value={d.userAccountId || ""}
+                  disabled={!d.userAccountId}
+                >
                   {`Dr ${d.firstName} ${d.lastName} — ${d.speciality}`}
                 </option>
               ))}

@@ -37,11 +37,11 @@ export default function NotificationsPage() {
     () =>
       recipientType === "PATIENT"
         ? patients.map((p) => ({
-            id: p.id,
+            id: p.userAccountId || p.id,
             label: `${p.firstName} ${p.lastName} (Patient)`,
           }))
         : doctors.map((d) => ({
-            id: d.id,
+            id: d.userAccountId || d.id,
             label: `Dr ${d.firstName} ${d.lastName} (${d.speciality})`,
           })),
     [recipientType, patients, doctors],

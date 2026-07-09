@@ -2,6 +2,7 @@
 # Logs
 # ==============================
 logs/
+scripts/
 *.log
 *.log.*
 npm-debug.log*
@@ -17,6 +18,12 @@ replay_pid*
 # Build artifacts
 # ==============================
 **/target/
+backend/appointment-service/target/
+backend/auth-service/target/
+backend/doctor-service/target/
+backend/hospital-service/target/
+backend/notification-service/target/
+backend/patient-service/target/
 **/build/
 **/dist/
 **/out/
@@ -29,6 +36,7 @@ replay_pid*
 # ==============================
 # Env / local config
 # ==============================
+.local-runtime/
 .env
 .env.*
 *.local

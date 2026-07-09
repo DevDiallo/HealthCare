@@ -21,7 +21,7 @@ public class PatientController {
         this.patientService = patientService;
     }
 
-    @PostMapping
+    @PostMapping({"", "/"})
     public ApiResponse<PatientResponse> create(@Valid @RequestBody PatientCreateRequest request) {
         return ApiResponse.ok("Patient created", patientService.create(request));
     }
@@ -42,7 +42,7 @@ public class PatientController {
         return ApiResponse.ok("Patient deleted", null);
     }
 
-    @GetMapping
+    @GetMapping({"", "/"})
     public ApiResponse<PageResponse<PatientResponse>> list(
             @RequestParam(required = false) String search,
             @RequestParam(defaultValue = "0") int page,

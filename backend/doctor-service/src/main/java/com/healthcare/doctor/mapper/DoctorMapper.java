@@ -11,6 +11,7 @@ public class DoctorMapper {
 
     public Doctor toEntity(DoctorCreateRequest request) {
         Doctor doctor = new Doctor();
+        doctor.setUserAccountId(request.userAccountId());
         doctor.setFirstName(request.firstName());
         doctor.setLastName(request.lastName());
         doctor.setSpeciality(request.speciality());
@@ -18,6 +19,7 @@ public class DoctorMapper {
     }
 
     public void merge(Doctor doctor, DoctorUpdateRequest request) {
+        doctor.setUserAccountId(request.userAccountId());
         doctor.setFirstName(request.firstName());
         doctor.setLastName(request.lastName());
         doctor.setSpeciality(request.speciality());
@@ -27,6 +29,7 @@ public class DoctorMapper {
         return new DoctorResponse(
                 doctor.getId(),
                 doctor.getHospitalId(),
+            doctor.getUserAccountId(),
                 doctor.getFirstName(),
                 doctor.getLastName(),
                 doctor.getSpeciality(),

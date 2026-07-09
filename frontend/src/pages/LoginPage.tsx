@@ -4,11 +4,18 @@ import { Link, useNavigate } from "react-router-dom";
 import { authApi } from "../services/authApi";
 import { useAppDispatch } from "../app/hooks";
 import { setSession } from "../features/auth/authSlice";
+import type { UserRole } from "../types/auth";
 
 const schema = Yup.object({
   email: Yup.string().email().required(),
   password: Yup.string().min(8).required(),
 });
+
+function homePathForRole(role: UserRole) {
+  if (role === "DOCTOR") return "/doctor-dashboard";
+  if (role === "PATIENT") return "/patient-dashboard";
+  return "/dashboard";
+}
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -25,7 +32,7 @@ export default function LoginPage() {
             try {
               const payload = await authApi.login(values);
               dispatch(setSession(payload));
-              navigate("/home");
+              navigate(homePathForRole(payload.role), { replace: true });
             } catch {
               helpers.setStatus("Identifiants invalides");
             }

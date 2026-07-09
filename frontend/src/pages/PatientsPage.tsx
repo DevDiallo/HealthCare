@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import PageHeader from "../components/PageHeader";
 import { domainApi } from "../services/domainApi";
 import type {
   ApiEnvelope,
   Appointment,
+  Doctor,
   Notification,
   PageResponse,
   Patient,
@@ -13,6 +14,8 @@ import { dateTimeLabel } from "../utils/format";
 
 type PatientForm = {
   id?: string;
+  userAccountId: string;
+  assignedDoctorUserId: string;
   firstName: string;
   lastName: string;
   email: string;
@@ -22,8 +25,21 @@ type PatientForm = {
   emergencyContact: string;
 };
 
+const EMPTY_FORM: PatientForm = {
+  userAccountId: "",
+  assignedDoctorUserId: "",
+  firstName: "",
+  lastName: "",
+  email: "",
+  bloodType: "",
+  allergies: "",
+  chronicConditions: "",
+  emergencyContact: "",
+};
+
 export default function PatientsPage() {
   const [rows, setRows] = useState<Patient[]>([]);
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [selectedPatientId, setSelectedPatientId] = useState<string>("");
@@ -31,45 +47,83 @@ export default function PatientsPage() {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [form, setForm] = useState<PatientForm>({
-    firstName: "",
-    lastName: "",
-    email: "",
-    bloodType: "",
-    allergies: "",
-    chronicConditions: "",
-    emergencyContact: "",
-  });
+  const [form, setForm] = useState<PatientForm>(EMPTY_FORM);
 
-  const selectedPatient = rows.find((row) => row.id === selectedPatientId);
+  const selectedPatient =
+    rows.find((row) => row.id === selectedPatientId) || null;
+
+  const doctorLabel = useMemo(
+    () =>
+      Object.fromEntries(
+        doctors.map((doctor) => [
+          doctor.userAccountId || doctor.id,
+          `Dr ${doctor.firstName} ${doctor.lastName} (${doctor.speciality})`,
+        ]),
+      ),
+    [doctors],
+  );
 
   async function loadPatients() {
     setLoading(true);
     setError(null);
     try {
-      const [patientsRes, appointmentsRes, notificationsRes] =
-        await Promise.all([
-          domainApi.patients({ page: 0, size: 200, search }),
-          domainApi.appointments({ page: 0, size: 200 }),
-          domainApi.notifications({ page: 0, size: 200 }),
-        ]);
-
+      const patientsRes = await domainApi.patients({
+        page: 0,
+        size: 200,
+        search,
+      });
+      const patientsPayload = (
+        patientsRes.data as ApiEnvelope<PageResponse<Patient>>
+      )?.data;
       const patientsData =
-        (patientsRes.data as ApiEnvelope<PageResponse<Patient>>)?.data
-          ?.content || [];
+        patientsPayload?.content || patientsPayload?.items || [];
       setRows(patientsData);
       if (!selectedPatientId && patientsData[0]) {
         setSelectedPatientId(patientsData[0].id);
       }
+      const [appointmentsRes, notificationsRes, doctorsRes] =
+        await Promise.allSettled([
+          domainApi.appointments({ page: 0, size: 200 }),
+          domainApi.notifications({ page: 0, size: 200 }),
+          domainApi.doctors({ page: 0, size: 200 }),
+        ]);
 
-      setAppointments(
-        (appointmentsRes.data as ApiEnvelope<PageResponse<Appointment>>)?.data
-          ?.content || [],
-      );
-      setNotifications(
-        (notificationsRes.data as ApiEnvelope<PageResponse<Notification>>)?.data
-          ?.content || [],
-      );
+      if (appointmentsRes.status === "fulfilled") {
+        const payload = (
+          appointmentsRes.value.data as ApiEnvelope<PageResponse<Appointment>>
+        )?.data;
+        setAppointments(payload?.content || payload?.items || []);
+      } else {
+        setAppointments([]);
+      }
+
+      if (notificationsRes.status === "fulfilled") {
+        const payload = (
+          notificationsRes.value.data as ApiEnvelope<PageResponse<Notification>>
+        )?.data;
+        setNotifications(payload?.content || payload?.items || []);
+      } else {
+        setNotifications([]);
+      }
+
+      if (doctorsRes.status === "fulfilled") {
+        const payload = (
+          doctorsRes.value.data as ApiEnvelope<PageResponse<Doctor>>
+        )?.data;
+        setDoctors(payload?.content || payload?.items || []);
+      } else {
+        setDoctors([]);
+      }
+
+      if (
+        appointmentsRes.status === "rejected" ||
+        notificationsRes.status === "rejected" ||
+        doctorsRes.status === "rejected"
+      ) {
+        setError(
+          "Certaines donnees secondaires n'ont pas pu etre chargees, mais la liste des patients est disponible.",
+        );
+      }
     } catch {
       setError("Chargement des patients impossible pour le moment.");
       setRows([]);
@@ -85,6 +139,8 @@ export default function PatientsPage() {
   function startEditPatient(patient: Patient) {
     setForm({
       id: patient.id,
+      userAccountId: patient.userAccountId || "",
+      assignedDoctorUserId: patient.assignedDoctorUserId || "",
       firstName: patient.firstName,
       lastName: patient.lastName,
       email: patient.email,
@@ -96,15 +152,7 @@ export default function PatientsPage() {
   }
 
   function resetForm() {
-    setForm({
-      firstName: "",
-      lastName: "",
-      email: "",
-      bloodType: "",
-      allergies: "",
-      chronicConditions: "",
-      emergencyContact: "",
-    });
+    setForm(EMPTY_FORM);
   }
 
   async function onSubmit(event: FormEvent) {
@@ -116,6 +164,8 @@ export default function PatientsPage() {
         firstName: form.firstName,
         lastName: form.lastName,
         email: form.email,
+        userAccountId: form.userAccountId || null,
+        assignedDoctorUserId: form.assignedDoctorUserId || null,
         bloodType: form.bloodType || null,
         allergies: form.allergies || null,
         chronicConditions: form.chronicConditions || null,
@@ -161,7 +211,7 @@ export default function PatientsPage() {
     );
 
   const selectedPatientMessages = notifications
-    .filter((item) => item.recipientUserId === selectedPatientId)
+    .filter((item) => item.recipientUserId === selectedPatient?.userAccountId)
     .sort(
       (a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
@@ -171,7 +221,7 @@ export default function PatientsPage() {
     <section>
       <PageHeader
         title="Patients"
-        subtitle="Dossiers medicaux, suivi clinique et communication continue"
+        subtitle="Dossiers medicaux, suivi clinique et affectation médecin"
       />
 
       <div className="profile-card toolbar-row">
@@ -192,7 +242,7 @@ export default function PatientsPage() {
           <input
             value={form.firstName}
             onChange={(e) =>
-              setForm((p) => ({ ...p, firstName: e.target.value }))
+              setForm((prev) => ({ ...prev, firstName: e.target.value }))
             }
             required
           />
@@ -200,7 +250,7 @@ export default function PatientsPage() {
           <input
             value={form.lastName}
             onChange={(e) =>
-              setForm((p) => ({ ...p, lastName: e.target.value }))
+              setForm((prev) => ({ ...prev, lastName: e.target.value }))
             }
             required
           />
@@ -208,14 +258,43 @@ export default function PatientsPage() {
           <input
             type="email"
             value={form.email}
-            onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
+            onChange={(e) =>
+              setForm((prev) => ({ ...prev, email: e.target.value }))
+            }
             required
           />
+          <label>Compte utilisateur lie</label>
+          <input
+            value={form.userAccountId}
+            onChange={(e) =>
+              setForm((prev) => ({ ...prev, userAccountId: e.target.value }))
+            }
+            placeholder="UUID du compte auth"
+          />
+          <label>Medecin affecte</label>
+          <select
+            value={form.assignedDoctorUserId}
+            onChange={(e) =>
+              setForm((prev) => ({
+                ...prev,
+                assignedDoctorUserId: e.target.value,
+              }))
+            }
+          >
+            <option value="">Aucun</option>
+            {doctors
+              .filter((doctor) => doctor.userAccountId)
+              .map((doctor) => (
+                <option key={doctor.id} value={doctor.userAccountId || ""}>
+                  {`Dr ${doctor.firstName} ${doctor.lastName} (${doctor.speciality})`}
+                </option>
+              ))}
+          </select>
           <label>Groupe sanguin</label>
           <input
             value={form.bloodType}
             onChange={(e) =>
-              setForm((p) => ({ ...p, bloodType: e.target.value }))
+              setForm((prev) => ({ ...prev, bloodType: e.target.value }))
             }
             placeholder="A+, O-, AB..."
           />
@@ -223,21 +302,27 @@ export default function PatientsPage() {
           <textarea
             value={form.allergies}
             onChange={(e) =>
-              setForm((p) => ({ ...p, allergies: e.target.value }))
+              setForm((prev) => ({ ...prev, allergies: e.target.value }))
             }
           />
           <label>Pathologies chroniques</label>
           <textarea
             value={form.chronicConditions}
             onChange={(e) =>
-              setForm((p) => ({ ...p, chronicConditions: e.target.value }))
+              setForm((prev) => ({
+                ...prev,
+                chronicConditions: e.target.value,
+              }))
             }
           />
           <label>Contact urgence</label>
           <input
             value={form.emergencyContact}
             onChange={(e) =>
-              setForm((p) => ({ ...p, emergencyContact: e.target.value }))
+              setForm((prev) => ({
+                ...prev,
+                emergencyContact: e.target.value,
+              }))
             }
             placeholder="Nom + telephone"
           />
@@ -257,6 +342,7 @@ export default function PatientsPage() {
               <tr>
                 <th>Patient</th>
                 <th>Email</th>
+                <th>Medecin affecte</th>
                 <th>Groupe</th>
                 <th>Urgence</th>
                 <th>Actions</th>
@@ -270,6 +356,12 @@ export default function PatientsPage() {
                 >
                   <td>{`${row.firstName} ${row.lastName}`}</td>
                   <td>{row.email}</td>
+                  <td>
+                    {row.assignedDoctorUserId
+                      ? doctorLabel[row.assignedDoctorUserId] ||
+                        row.assignedDoctorUserId
+                      : "-"}
+                  </td>
                   <td>{row.bloodType || "-"}</td>
                   <td>{row.emergencyContact || "-"}</td>
                   <td>
@@ -299,7 +391,7 @@ export default function PatientsPage() {
               ))}
               {!rows.length && (
                 <tr>
-                  <td colSpan={5}>
+                  <td colSpan={6}>
                     {loading ? "Chargement..." : "Aucun patient trouve."}
                   </td>
                 </tr>
@@ -325,6 +417,17 @@ export default function PatientsPage() {
           {selectedPatient && (
             <>
               <p>
+                <strong>Compte lie:</strong>{" "}
+                {selectedPatient.userAccountId || "Non lie"}
+              </p>
+              <p>
+                <strong>Medecin affecte:</strong>{" "}
+                {selectedPatient.assignedDoctorUserId
+                  ? doctorLabel[selectedPatient.assignedDoctorUserId] ||
+                    selectedPatient.assignedDoctorUserId
+                  : "Aucun"}
+              </p>
+              <p>
                 <strong>Allergies:</strong>{" "}
                 {selectedPatient.allergies || "Aucune information"}
               </p>
@@ -348,9 +451,9 @@ export default function PatientsPage() {
               <h4>Rendez-vous</h4>
               <ul className="timeline-list">
                 {selectedPatientAppointments.slice(0, 5).map((item) => (
-                  <li
-                    key={item.id}
-                  >{`${dateTimeLabel(item.appointmentAt)} - ${item.status}`}</li>
+                  <li key={item.id}>
+                    {`${dateTimeLabel(item.appointmentAt)} - ${item.status}`}
+                  </li>
                 ))}
                 {!selectedPatientAppointments.length && (
                   <li>Aucun rendez-vous enregistre.</li>
@@ -360,9 +463,9 @@ export default function PatientsPage() {
               <h4>Messages recus</h4>
               <ul className="timeline-list">
                 {selectedPatientMessages.slice(0, 5).map((item) => (
-                  <li
-                    key={item.id}
-                  >{`${dateTimeLabel(item.createdAt)} - ${item.title}`}</li>
+                  <li key={item.id}>
+                    {`${dateTimeLabel(item.createdAt)} - ${item.title}`}
+                  </li>
                 ))}
                 {!selectedPatientMessages.length && (
                   <li>Aucun message enregistre.</li>

@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -49,6 +50,22 @@ public class DoctorServiceImpl implements DoctorService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public DoctorResponse getByUserAccountId(UUID userAccountId) {
+        Doctor doctor = repository.findByUserAccountId(userAccountId)
+                .orElseThrow(() -> new NotFoundException("Doctor not found for user account: " + userAccountId));
+        var currentUser = requireCurrentUser();
+        if (currentUser.role() == UserRole.DOCTOR && !currentUser.userId().equals(doctor.getUserAccountId())) {
+            throw new UnauthorizedException("Access denied for this doctor");
+        }
+        UUID scope = resolveHospitalScope(null);
+        if (scope != null && !scope.equals(doctor.getHospitalId())) {
+            throw new UnauthorizedException("Access denied for this doctor");
+        }
+        return mapper.toResponse(doctor);
+    }
+
+    @Override
     public DoctorResponse update(UUID id, DoctorUpdateRequest request) {
         Doctor doctor = loadAndAuthorize(id);
         mapper.merge(doctor, request);
@@ -58,14 +75,22 @@ public class DoctorServiceImpl implements DoctorService {
 
     @Override
     public void delete(UUID id) {
-        repository.delete(loadAndAuthorize(id));
+        Doctor doctor = loadAndAuthorize(id);
+        repository.delete(doctor);
     }
 
     @Override
     @Transactional(readOnly = true)
     public PageResponse<DoctorResponse> list(String search, String speciality, int page, int size, String sort) {
+        var currentUser = requireCurrentUser();
         UUID hospitalScope = resolveHospitalScope(null);
-        Specification<Doctor> spec = (root, query, cb) -> cb.equal(root.get("hospitalId"), hospitalScope);
+        Specification<Doctor> spec = (root, query, cb) -> cb.conjunction();
+        if (hospitalScope != null) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("hospitalId"), hospitalScope));
+        }
+        if (currentUser.role() == UserRole.DOCTOR) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("userAccountId"), currentUser.userId()));
+        }
         if (search != null && !search.isBlank()) {
             String pattern = "%" + search.toLowerCase() + "%";
             spec = spec.and((root, query, cb) -> cb.or(
@@ -77,32 +102,39 @@ public class DoctorServiceImpl implements DoctorService {
             String specialityVal = speciality.toLowerCase();
             spec = spec.and((root, query, cb) -> cb.equal(cb.lower(root.get("speciality")), specialityVal));
         }
-        var pageable = PageRequest.of(page, size, SortUtils.parseSort(sort, ALLOWED_SORT, "createdAt"));
+        var sortOrder = Objects.requireNonNull(SortUtils.parseSort(sort, ALLOWED_SORT, "createdAt"));
+        var pageable = PageRequest.of(page, size, sortOrder);
         return PageResponse.from(repository.findAll(spec, pageable).map(mapper::toResponse));
     }
 
     private Doctor loadAndAuthorize(UUID id) {
         Doctor doctor = repository.findById(id).orElseThrow(() -> new NotFoundException("Doctor not found: " + id));
+        var currentUser = requireCurrentUser();
+        if (currentUser.role() == UserRole.DOCTOR && !currentUser.userId().equals(doctor.getUserAccountId())) {
+            throw new UnauthorizedException("Access denied for this doctor");
+        }
         UUID scope = resolveHospitalScope(null);
-        if (!scope.equals(doctor.getHospitalId())) {
+        if (scope != null && !scope.equals(doctor.getHospitalId())) {
             throw new UnauthorizedException("Access denied for this doctor");
         }
         return doctor;
     }
 
-    private UUID resolveHospitalScope(UUID requestedHospitalId) {
+    private com.healthcare.doctor.security.CurrentUser requireCurrentUser() {
         var currentUser = TenantContextHolder.get();
         if (currentUser == null) {
             throw new UnauthorizedException("Missing authenticated user");
         }
+        return currentUser;
+    }
+
+    private UUID resolveHospitalScope(UUID requestedHospitalId) {
+        var currentUser = requireCurrentUser();
         if (currentUser.role() == UserRole.SUPER_ADMIN) {
-            if (requestedHospitalId == null) {
-                throw new UnauthorizedException("SUPER_ADMIN must provide hospitalId");
-            }
             return requestedHospitalId;
         }
         if (currentUser.hospitalId() == null) {
-            throw new UnauthorizedException("Hospital scope missing in token");
+            return requestedHospitalId;
         }
         if (requestedHospitalId != null && !requestedHospitalId.equals(currentUser.hospitalId())) {
             throw new UnauthorizedException("Cannot use another hospitalId");

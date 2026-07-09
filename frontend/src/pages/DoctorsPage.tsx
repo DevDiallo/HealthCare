@@ -13,6 +13,7 @@ import { dateTimeLabel } from "../utils/format";
 
 type DoctorForm = {
   id?: string;
+  userAccountId: string;
   firstName: string;
   lastName: string;
   speciality: string;
@@ -29,10 +30,13 @@ export default function DoctorsPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState<DoctorForm>({
+    userAccountId: "",
     firstName: "",
     lastName: "",
     speciality: "",
   });
+
+  const selectedDoctor = rows.find((row) => row.id === selectedDoctorId);
 
   const patientLabel = useMemo(
     () =>
@@ -49,6 +53,12 @@ export default function DoctorsPage() {
         new Date(b.appointmentAt).getTime() -
         new Date(a.appointmentAt).getTime(),
     );
+
+  const selectedDoctorPatients = patients.filter(
+    (patient) =>
+      selectedDoctor?.userAccountId &&
+      patient.assignedDoctorUserId === selectedDoctor.userAccountId,
+  );
 
   async function loadDoctors() {
     setLoading(true);
@@ -91,6 +101,7 @@ export default function DoctorsPage() {
   function onEditDoctor(doctor: Doctor) {
     setForm({
       id: doctor.id,
+      userAccountId: doctor.userAccountId || "",
       firstName: doctor.firstName,
       lastName: doctor.lastName,
       speciality: doctor.speciality,
@@ -98,7 +109,7 @@ export default function DoctorsPage() {
   }
 
   function resetForm() {
-    setForm({ firstName: "", lastName: "", speciality: "" });
+    setForm({ userAccountId: "", firstName: "", lastName: "", speciality: "" });
   }
 
   async function onSubmit(event: FormEvent) {
@@ -107,6 +118,7 @@ export default function DoctorsPage() {
     setError(null);
     try {
       const payload = {
+        userAccountId: form.userAccountId || null,
         firstName: form.firstName,
         lastName: form.lastName,
         speciality: form.speciality,
@@ -182,6 +194,14 @@ export default function DoctorsPage() {
             }
             required
           />
+          <label>Compte utilisateur lie</label>
+          <input
+            value={form.userAccountId}
+            onChange={(e) =>
+              setForm((p) => ({ ...p, userAccountId: e.target.value }))
+            }
+            placeholder="UUID du compte auth"
+          />
           <label>Specialite</label>
           <input
             value={form.speciality}
@@ -205,6 +225,7 @@ export default function DoctorsPage() {
             <thead>
               <tr>
                 <th>Medecin</th>
+                <th>Compte lie</th>
                 <th>Specialite</th>
                 <th>Actions</th>
               </tr>
@@ -216,6 +237,7 @@ export default function DoctorsPage() {
                   className={selectedDoctorId === row.id ? "row-selected" : ""}
                 >
                   <td>{`Dr ${row.firstName} ${row.lastName}`}</td>
+                  <td>{row.userAccountId || "-"}</td>
                   <td>{row.speciality}</td>
                   <td>
                     <div className="row-actions">
@@ -241,7 +263,7 @@ export default function DoctorsPage() {
               ))}
               {!rows.length && (
                 <tr>
-                  <td colSpan={3}>
+                  <td colSpan={4}>
                     {loading ? "Chargement..." : "Aucun medecin trouve."}
                   </td>
                 </tr>
@@ -261,31 +283,37 @@ export default function DoctorsPage() {
           </p>
         )}
         {!!selectedDoctorId && (
-          <div className="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Patient</th>
-                  <th>Statut</th>
-                </tr>
-              </thead>
-              <tbody>
-                {selectedDoctorAppointments.slice(0, 15).map((item) => (
-                  <tr key={item.id}>
-                    <td>{dateTimeLabel(item.appointmentAt)}</td>
-                    <td>{patientLabel[item.patientId] || item.patientId}</td>
-                    <td>{item.status}</td>
-                  </tr>
-                ))}
-                {!selectedDoctorAppointments.length && (
+          <>
+            <p>
+              <strong>Patients affectes:</strong>{" "}
+              {selectedDoctorPatients.length}
+            </p>
+            <div className="table-wrap">
+              <table>
+                <thead>
                   <tr>
-                    <td colSpan={3}>Aucun rendez-vous pour ce medecin.</td>
+                    <th>Date</th>
+                    <th>Patient</th>
+                    <th>Statut</th>
                   </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {selectedDoctorAppointments.slice(0, 15).map((item) => (
+                    <tr key={item.id}>
+                      <td>{dateTimeLabel(item.appointmentAt)}</td>
+                      <td>{patientLabel[item.patientId] || item.patientId}</td>
+                      <td>{item.status}</td>
+                    </tr>
+                  ))}
+                  {!selectedDoctorAppointments.length && (
+                    <tr>
+                      <td colSpan={3}>Aucun rendez-vous pour ce medecin.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
     </section>

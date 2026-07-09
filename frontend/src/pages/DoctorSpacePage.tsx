@@ -6,7 +6,6 @@ import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import PageHeader from "../components/PageHeader";
 import { domainApi } from "../services/domainApi";
-import { useAppSelector } from "../app/hooks";
 import type {
   ApiEnvelope,
   Appointment,
@@ -44,8 +43,6 @@ const STATUS_CLASS: Record<string, string> = {
 export default function DoctorSpacePage({
   initialTab = "dashboard",
 }: DoctorSpaceProps) {
-  const userId = useAppSelector((state) => state.auth.userId);
-
   const [tab, setTab] = useState<Tab>(initialTab);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [patients, setPatients] = useState<Patient[]>([]);
@@ -65,6 +62,10 @@ export default function DoctorSpacePage({
 
   const patientById = useMemo(
     () => Object.fromEntries(patients.map((p) => [p.id, p])),
+    [patients],
+  );
+  const patientByUserAccountId = useMemo(
+    () => Object.fromEntries(patients.map((p) => [p.userAccountId || p.id, p])),
     [patients],
   );
 
@@ -91,17 +92,16 @@ export default function DoctorSpacePage({
 
       const allDoctors =
         (docRes.data as ApiEnvelope<PageResponse<Doctor>>)?.data?.content || [];
-      const me =
-        allDoctors.find((d) => String(d.id) === String(userId)) ||
-        allDoctors[0] ||
-        null;
+      const me = allDoctors[0] || null;
       setMyProfile(me);
 
       const allNotifications =
         (notifRes.data as ApiEnvelope<PageResponse<Notification>>)?.data
           ?.content || [];
       const myMessages = allNotifications.filter((n) =>
-        me ? String(n.recipientUserId) === String(me.id) : false,
+        me
+          ? String(n.recipientUserId) === String(me.userAccountId || me.id)
+          : false,
       );
       setMessages(myMessages);
     } catch {
@@ -120,7 +120,7 @@ export default function DoctorSpacePage({
     setTab(initialTab);
   }, [initialTab]);
 
-  const currentDoctorId = myProfile?.id || userId || "";
+  const currentDoctorId = myProfile?.id || "";
 
   // Only appointments for this doctor
   const myAppointments = useMemo(
@@ -150,22 +150,17 @@ export default function DoctorSpacePage({
   });
 
   // Unique patients seen by this doctor
-  const myPatientIds = useMemo(
-    () => [...new Set(myAppointments.map((a) => a.patientId))],
-    [myAppointments],
-  );
+  const myPatientIds = useMemo(() => patients.map((p) => p.id), [patients]);
 
-  const filteredPatients = patients
-    .filter((p) => myPatientIds.includes(p.id))
-    .filter((p) => {
-      if (!patientSearch) return true;
-      const q = patientSearch.toLowerCase();
-      return (
-        p.firstName.toLowerCase().includes(q) ||
-        p.lastName.toLowerCase().includes(q) ||
-        p.email.toLowerCase().includes(q)
-      );
-    });
+  const filteredPatients = patients.filter((p) => {
+    if (!patientSearch) return true;
+    const q = patientSearch.toLowerCase();
+    return (
+      p.firstName.toLowerCase().includes(q) ||
+      p.lastName.toLowerCase().includes(q) ||
+      p.email.toLowerCase().includes(q)
+    );
+  });
 
   const patientsByFollowup = useMemo(
     () =>
@@ -582,7 +577,11 @@ export default function DoctorSpacePage({
             >
               <option value="">Selectionner...</option>
               {filteredPatients.map((p) => (
-                <option key={p.id} value={p.id}>
+                <option
+                  key={p.id}
+                  value={p.userAccountId || ""}
+                  disabled={!p.userAccountId}
+                >
                   {`${p.firstName} ${p.lastName}`}
                 </option>
               ))}
@@ -616,7 +615,7 @@ export default function DoctorSpacePage({
             {!messages.length && <p className="muted">Aucun message reçu.</p>}
             <ul className="msg-list">
               {messages.map((msg) => {
-                const recipient = patientById[msg.recipientUserId];
+                const recipient = patientByUserAccountId[msg.recipientUserId];
                 return (
                   <li key={msg.id} className="msg-item">
                     <div className="msg-header">

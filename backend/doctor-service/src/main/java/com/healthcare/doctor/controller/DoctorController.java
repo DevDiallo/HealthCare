@@ -21,7 +21,7 @@ public class DoctorController {
         this.doctorService = doctorService;
     }
 
-    @PostMapping
+    @PostMapping({"", "/"})
     public ApiResponse<DoctorResponse> create(@Valid @RequestBody DoctorCreateRequest request) {
         return ApiResponse.ok("Doctor created", doctorService.create(request));
     }
@@ -42,7 +42,7 @@ public class DoctorController {
         return ApiResponse.ok("Doctor deleted", null);
     }
 
-    @GetMapping
+    @GetMapping({"", "/"})
     public ApiResponse<PageResponse<DoctorResponse>> list(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String speciality,
@@ -51,5 +51,10 @@ public class DoctorController {
             @RequestParam(required = false) String sort
     ) {
         return ApiResponse.ok("Doctors listed", doctorService.list(search, speciality, page, size, sort));
+    }
+
+    @GetMapping("/by-user/{userAccountId}")
+    public ApiResponse<DoctorResponse> getByUserAccountId(@PathVariable UUID userAccountId) {
+        return ApiResponse.ok("Doctor fetched", doctorService.getByUserAccountId(userAccountId));
     }
 }

@@ -75,7 +75,10 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional(readOnly = true)
     public PageResponse<NotificationResponse> list(int page, int size, String sort) {
         UUID hospitalScope = resolveHospitalScope(null);
-        Specification<Notification> spec = (root, query, cb) -> cb.equal(root.get("hospitalId"), hospitalScope);
+        Specification<Notification> spec = (root, query, cb) -> cb.conjunction();
+        if (hospitalScope != null) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("hospitalId"), hospitalScope));
+        }
         var pageable = PageRequest.of(page, size, SortUtils.parseSort(sort, ALLOWED_SORT, "createdAt"));
         return PageResponse.from(repository.findAll(spec, pageable).map(mapper::toResponse));
     }
@@ -83,7 +86,7 @@ public class NotificationServiceImpl implements NotificationService {
     private Notification loadAndAuthorize(UUID id) {
         Notification notification = repository.findById(id).orElseThrow(() -> new NotFoundException("Notification not found: " + id));
         UUID scope = resolveHospitalScope(null);
-        if (!scope.equals(notification.getHospitalId())) {
+        if (scope != null && !scope.equals(notification.getHospitalId())) {
             throw new UnauthorizedException("Access denied for this notification");
         }
         return notification;
@@ -95,13 +98,10 @@ public class NotificationServiceImpl implements NotificationService {
             throw new UnauthorizedException("Missing authenticated user");
         }
         if (currentUser.role() == UserRole.SUPER_ADMIN) {
-            if (requestedHospitalId == null) {
-                throw new UnauthorizedException("SUPER_ADMIN must provide hospitalId");
-            }
             return requestedHospitalId;
         }
         if (currentUser.hospitalId() == null) {
-            throw new UnauthorizedException("Hospital scope missing in token");
+            return requestedHospitalId;
         }
         if (requestedHospitalId != null && !requestedHospitalId.equals(currentUser.hospitalId())) {
             throw new UnauthorizedException("Cannot use another hospitalId");
