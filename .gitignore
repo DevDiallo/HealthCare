@@ -2,6 +2,7 @@
 # Logs
 # ==============================
 logs/
+scripts/
 *.log
 *.log.*
 npm-debug.log*
