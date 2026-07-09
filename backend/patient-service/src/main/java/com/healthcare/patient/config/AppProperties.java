@@ -16,7 +16,7 @@ public class AppProperties {
     private long jwtExpirationSeconds = 3600;
 
     @NotBlank
-    private String doctorServiceBaseUrl = "http://localhost:8084";
+    private String doctorServiceBaseUrl = "http://doctor-service";
 
     public String getJwtSecret() {
         return jwtSecret;

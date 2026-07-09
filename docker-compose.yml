@@ -42,6 +42,16 @@ services:
       timeout: 5s
       retries: 10
 
+  discovery-service:
+    image: ${DISCOVERY_IMAGE:-springcloud/eureka:latest}
+    pull_policy: always
+    environment:
+      SERVER_PORT: 8761
+    ports:
+      - "8761:8761"
+    networks:
+      - healthcare_net
+
   auth-service:
     build: ./backend/auth-service
     environment:
@@ -49,7 +59,10 @@ services:
       DB_USERNAME: healthcare
       DB_PASSWORD: healthcare
       JWT_SECRET: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZg==
+      EUREKA_SERVER_URL: http://discovery-service:8761/eureka
     depends_on:
+      discovery-service:
+        condition: service_started
       postgres:
         condition: service_healthy
     networks:
@@ -63,7 +76,10 @@ services:
       DB_PASSWORD: healthcare
       JWT_SECRET: 0123456789ABCDEF0123456789ABCDEF
       SERVER_PORT: 8082
+      EUREKA_SERVER_URL: http://discovery-service:8761/eureka
     depends_on:
+      discovery-service:
+        condition: service_started
       postgres:
         condition: service_healthy
     networks:
@@ -77,8 +93,11 @@ services:
       DB_PASSWORD: healthcare
       JWT_SECRET: 0123456789ABCDEF0123456789ABCDEF
       SERVER_PORT: 8083
-      DOCTOR_SERVICE_BASE_URL: http://doctor-service:8084
+      EUREKA_SERVER_URL: http://discovery-service:8761/eureka
+      DOCTOR_SERVICE_BASE_URL: http://doctor-service
     depends_on:
+      discovery-service:
+        condition: service_started
       postgres:
         condition: service_healthy
     networks:
@@ -92,8 +111,11 @@ services:
       DB_PASSWORD: healthcare
       JWT_SECRET: 0123456789ABCDEF0123456789ABCDEF
       SERVER_PORT: 8084
-      PATIENT_SERVICE_BASE_URL: http://patient-service:8083
+      EUREKA_SERVER_URL: http://discovery-service:8761/eureka
+      PATIENT_SERVICE_BASE_URL: http://patient-service
     depends_on:
+      discovery-service:
+        condition: service_started
       postgres:
         condition: service_healthy
     networks:
@@ -107,11 +129,14 @@ services:
       DB_PASSWORD: healthcare
       JWT_SECRET: 0123456789ABCDEF0123456789ABCDEF
       SERVER_PORT: 8085
-      PATIENT_SERVICE_BASE_URL: http://patient-service:8083
-      DOCTOR_SERVICE_BASE_URL: http://doctor-service:8084
+      EUREKA_SERVER_URL: http://discovery-service:8761/eureka
+      PATIENT_SERVICE_BASE_URL: http://patient-service
+      DOCTOR_SERVICE_BASE_URL: http://doctor-service
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       APPOINTMENT_EVENTS_TOPIC: appointment-events
     depends_on:
+      discovery-service:
+        condition: service_started
       kafka:
         condition: service_started
       postgres:
@@ -127,9 +152,12 @@ services:
       DB_PASSWORD: healthcare
       JWT_SECRET: 0123456789ABCDEF0123456789ABCDEF
       SERVER_PORT: 8086
+      EUREKA_SERVER_URL: http://discovery-service:8761/eureka
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       APPOINTMENT_EVENTS_TOPIC: appointment-events
     depends_on:
+      discovery-service:
+        condition: service_started
       kafka:
         condition: service_started
       postgres:
@@ -147,6 +175,7 @@ services:
     depends_on:
       - frontend
       - auth-service
+      - discovery-service
       - hospital-service
       - patient-service
       - doctor-service

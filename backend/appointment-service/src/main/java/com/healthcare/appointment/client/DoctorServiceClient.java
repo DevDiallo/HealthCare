@@ -18,9 +18,9 @@ public class DoctorServiceClient {
 
     private final RestClient restClient;
 
-    public DoctorServiceClient(AppProperties properties) {
+    public DoctorServiceClient(AppProperties properties, RestClient.Builder restClientBuilder) {
         String baseUrl = Objects.requireNonNull(properties.getDoctorServiceBaseUrl(), "doctorServiceBaseUrl");
-        this.restClient = RestClient.builder()
+        this.restClient = restClientBuilder
             .baseUrl(baseUrl)
                 .build();
     }

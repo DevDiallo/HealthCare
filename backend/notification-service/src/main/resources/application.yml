@@ -26,3 +26,10 @@ app:
   jwt-expiration-seconds: ${JWT_EXPIRATION_SECONDS:3600}
   kafka:
     appointment-topic: ${APPOINTMENT_EVENTS_TOPIC:appointment-events}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL:http://localhost:8761/eureka}
+  instance:
+    prefer-ip-address: true

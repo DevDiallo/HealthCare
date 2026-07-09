@@ -17,4 +17,11 @@ server:
 app:
   jwt-secret: ${JWT_SECRET:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef}
   jwt-expiration-seconds: ${JWT_EXPIRATION_SECONDS:3600}
-  patient-service-base-url: ${PATIENT_SERVICE_BASE_URL:http://localhost:8083}
+  patient-service-base-url: ${PATIENT_SERVICE_BASE_URL:http://patient-service}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL:http://localhost:8761/eureka}
+  instance:
+    prefer-ip-address: true
