@@ -12,6 +12,7 @@ Plateforme SaaS de gestion hospitaliere multi-tenant, basee sur une architecture
 
 ## Services
 
+- discovery-service (Eureka): http://localhost:8761
 - auth-service: http://localhost/api/auth
 - hospital-service: http://localhost/api/hospitals
 - patient-service: http://localhost/api/patients
@@ -23,9 +24,11 @@ Plateforme SaaS de gestion hospitaliere multi-tenant, basee sur une architecture
 
 1. Generer les certificats TLS:
    - bash scripts/generate-certs.sh
-2. Lancer la plateforme:
+2. Recuperer l'image Discovery Service depuis Docker Hub:
+   - docker pull springcloud/eureka:latest
+3. Lancer la plateforme:
    - docker compose up --build
-3. Ouvrir l'application:
+4. Ouvrir l'application:
    - https://localhost
 
 ## Developpement local
@@ -48,6 +51,8 @@ Le gateway local ecoute sur `http://localhost:8080` et route:
 - `/api/doctors/*` vers `doctor-service` (`localhost:8084`)
 - `/api/appointments/*` vers `appointment-service` (`localhost:8085`)
 - `/api/notifications/*` vers `notification-service` (`localhost:8086`)
+
+Le registre de services (Eureka) est disponible sur `http://localhost:8761`.
 
 ### Prerequis (sans Docker)
 
